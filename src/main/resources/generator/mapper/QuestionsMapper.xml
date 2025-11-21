@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yclin.quiz.mapper.QuestionsMapper">
+
+    <resultMap id="BaseResultMap" type="com.yclin.quiz.model.domain.Questions">
+            <id property="id" column="id" />
+            <result property="questionText" column="questionText" />
+            <result property="answer1Text" column="answer1Text" />
+            <result property="answer1Correct" column="answer1Correct" />
+            <result property="answer2Text" column="answer2Text" />
+            <result property="answer2Correct" column="answer2Correct" />
+            <result property="answer3Text" column="answer3Text" />
+            <result property="answer3Correct" column="answer3Correct" />
+            <result property="answer4Text" column="answer4Text" />
+            <result property="answer4Correct" column="answer4Correct" />
+            <result property="isDelete" column="isDelete" />
+            <result property="createTime" column="createTime" />
+            <result property="updateTime" column="updateTime" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,questionText,answer1Text,answer1Correct,answer2Text,answer2Correct,
+        answer3Text,answer3Correct,answer4Text,answer4Correct,isDelete,
+        createTime,updateTime
+    </sql>
+</mapper>

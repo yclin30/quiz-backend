@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: quiz
+  # DataSource Config
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/quiz
+    username: root
+    password: lyc
+
+    
+
+server:
+  port: 8080
+
+mybatis-plus:
+  mapper-locations: classpath:/mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: false
+  global-config:
+    db-config:
+      logic-delete-field: isDelete # ????????????(since 3.3.0,????????????2)
+      logic-delete-value: 1 # ??????(??? 1)
+      logic-not-delete-value: 0 # ??????(??? 0)
+
+
