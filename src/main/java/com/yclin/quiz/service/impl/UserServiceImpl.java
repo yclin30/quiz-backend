@@ -2,6 +2,7 @@ package com.yclin.quiz.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.yclin.quiz.dto.UserLoginRequest;
 import com.yclin.quiz.dto.UserRegisterRequest;
 import com.yclin.quiz.mapper.UserMapper;
 import com.yclin.quiz.model.domain.PageBean;
@@ -99,6 +100,40 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
 
         return user.getId();
+    }
+
+    // 在 UserServiceImpl 类中添加以下方法
+
+    @Override
+    public User userLogin(UserLoginRequest userLoginRequest) {
+        String userName = userLoginRequest.getUserName();
+        String userPassword = userLoginRequest.getUserPassword();
+
+        // 1. 校验参数
+        if (StringUtils.isAnyBlank(userName, userPassword)) {
+            throw new RuntimeException("用户名或密码不能为空");
+        }
+
+        // 2. 查询用户
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("userName", userName);
+        queryWrapper.eq("isDelete", 0);
+        User user = this.getOne(queryWrapper);
+
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+
+        // 3. 验证密码
+        String encryptPassword = DigestUtils.md5DigestAsHex(
+                (SALT + userPassword).getBytes());
+
+        if (!encryptPassword.equals(user.getUserPassword())) {
+            throw new RuntimeException("用户名或密码错误");
+        }
+
+        // 4. 返回用户信息（脱敏）
+        return getSafetyUser(user);
     }
 
     @Override

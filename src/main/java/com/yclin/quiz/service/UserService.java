@@ -1,6 +1,7 @@
 package com.yclin.quiz.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.yclin.quiz.dto.UserLoginRequest;
 import com.yclin.quiz.dto.UserRegisterRequest;
 import com.yclin.quiz.model.domain.PageBean;
 import com.yclin.quiz.model.domain.User;
@@ -49,6 +50,9 @@ public interface UserService extends IService<User> {
      * 硬删除 - 根据用户名
      */
     boolean hardDeleteByName(String username);
+
+    User userLogin(UserLoginRequest userLoginRequest);
+
 
     PageBean page(Integer page, Integer pageSize);
 

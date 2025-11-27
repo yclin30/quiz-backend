@@ -1,14 +1,18 @@
 package com.yclin.quiz.controller;
 
+import com.yclin.quiz.dto.UserLoginRequest;
 import com.yclin.quiz.dto.UserRegisterRequest;
 import com.yclin.quiz.model.domain.PageBean;
 import com.yclin.quiz.model.domain.Result;
 import com.yclin.quiz.model.domain.User;
 import com.yclin.quiz.service.UserService;
+import com.yclin.quiz.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 用户接口
@@ -19,6 +23,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     /**
      * 用户注册
@@ -133,5 +140,61 @@ public class UserController {
     public Result getUser(String keyword){
         List<User> users=userService.findByName(keyword);
         return Result.success(users);
+    }
+
+    @PostMapping("/login")
+    public Result userLogin(@RequestBody UserLoginRequest userLoginRequest) {
+        if (userLoginRequest == null) {
+            return Result.error("参数为空");
+        }
+        try {
+            User user = userService.userLogin(userLoginRequest);
+
+            // 生成 Token
+            String token = jwtUtil.generateToken(
+                    user.getId(),
+                    user.getUserName(),
+                    user.getUserRole()
+            );
+
+            // 返回用户信息和 Token
+            Map<String, Object> data = new HashMap<>();
+            data.put("user", user);
+            data.put("token", token);
+
+            return Result.success("登录成功", data);
+        } catch (RuntimeException e) {
+            return Result.error(e.getMessage());
+        }
+    }
+
+    /**
+     * 获取当前登录用户信息
+     */
+    @GetMapping("/current")
+    public Result getCurrentUser(@RequestHeader(value = "Authorization", required = false) String token) {
+        if (token == null || token.isEmpty()) {
+            return Result.error("未登录");
+        }
+
+        try {
+            // 去掉 "Bearer " 前缀
+            if (token.startsWith("Bearer ")) {
+                token = token.substring(7);
+            }
+
+            // 验证 Token
+            if (!jwtUtil.validateToken(token)) {
+                return Result.error("Token已过期");
+            }
+
+            // 获取用户信息
+            Long userId = jwtUtil.getUserIdFromToken(token);
+            User user = userService.getUserById(userId);
+
+            return Result.success(user);
+        } catch (Exception e) {
+            return Result.error("Token无效");
+        }
     }
 }
