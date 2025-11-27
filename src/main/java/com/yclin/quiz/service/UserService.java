@@ -1,9 +1,11 @@
 package com.yclin.quiz.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.yclin.quiz.dto.UserLoginRequest;
 import com.yclin.quiz.dto.UserRegisterRequest;
 import com.yclin.quiz.model.domain.PageBean;
 import com.yclin.quiz.model.domain.User;
+import com.yclin.quiz.model.vo.UserLoginVO;
 
 
 import java.util.List;
@@ -53,4 +55,11 @@ public interface UserService extends IService<User> {
     PageBean page(Integer page, Integer pageSize);
 
     public List<User> findByName(String keyword);
+
+    /**
+     * 用户登录
+     * @param loginRequest 登录请求
+     * @return 登录响应（包含用户信息和Token）
+     */
+    UserLoginVO userLogin(UserLoginRequest loginRequest);
 }

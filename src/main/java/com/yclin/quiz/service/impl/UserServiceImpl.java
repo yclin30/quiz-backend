@@ -2,12 +2,15 @@ package com.yclin.quiz.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.yclin.quiz.dto.UserLoginRequest;
 import com.yclin.quiz.dto.UserRegisterRequest;
 import com.yclin.quiz.mapper.UserMapper;
 import com.yclin.quiz.model.domain.PageBean;
 import com.yclin.quiz.model.domain.User;
 
+import com.yclin.quiz.model.vo.UserLoginVO;
 import com.yclin.quiz.service.UserService;
+import com.yclin.quiz.util.JwtUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -236,5 +239,49 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             user.setUserPassword("*******");
         }
         return userList;
+    }
+
+    @Override
+    public UserLoginVO userLogin(UserLoginRequest loginRequest) {
+        String userName = loginRequest.getUserName();
+        String userPassword = loginRequest.getUserPassword();
+
+        // 1. 校验参数是否为空
+        if (StringUtils.isAnyBlank(userName, userPassword)) {
+            throw new RuntimeException("用户名或密码不能为空");
+        }
+
+        // 2. 对密码进行加密
+        String encryptPassword = DigestUtils.md5DigestAsHex(
+                (SALT + userPassword).getBytes());
+
+        // 3. 查询用户
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("userName", userName);
+        queryWrapper.eq("isDelete", 0);
+        User user = this.getOne(queryWrapper);
+
+        // 4. 校验用户是否存在
+        if (user == null) {
+            throw new RuntimeException("用户不存在或已被删除");
+        }
+
+        // 5. 校验密码是否正确
+        if (!encryptPassword.equals(user.getUserPassword())) {
+            throw new RuntimeException("密码错误");
+        }
+
+        // 6. 生成 JWT Token
+        String token = JwtUtil.generateToken(user.getId(), user.getUserName(), user.getUserRole());
+
+        // 7. 封装返回结果
+        UserLoginVO userLoginVO = new UserLoginVO();
+        userLoginVO.setId(user.getId());
+        userLoginVO.setUserName(user.getUserName());
+        userLoginVO.setUserRole(user.getUserRole());
+        userLoginVO.setToken(token);
+
+        log.info("用户登录成功：{}", userName);
+        return userLoginVO;
     }
 }

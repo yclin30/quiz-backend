@@ -1,9 +1,11 @@
 package com.yclin.quiz.controller;
 
+import com.yclin.quiz.dto.UserLoginRequest;
 import com.yclin.quiz.dto.UserRegisterRequest;
 import com.yclin.quiz.model.domain.PageBean;
 import com.yclin.quiz.model.domain.Result;
 import com.yclin.quiz.model.domain.User;
+import com.yclin.quiz.model.vo.UserLoginVO;
 import com.yclin.quiz.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +21,25 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    /**
+     * 用户登录
+     *
+     * @param loginRequest 登录请求
+     * @return 登录结果
+     */
+    @PostMapping("/login")
+    public Result userLogin(@RequestBody UserLoginRequest loginRequest) {
+        if (loginRequest == null) {
+            return Result.error("参数为空");
+        }
+        try {
+            UserLoginVO userLoginVO = userService.userLogin(loginRequest);
+            return Result.success("登录成功", userLoginVO);
+        } catch (RuntimeException e) {
+            return Result.error(e.getMessage());
+        }
+    }
 
     /**
      * 用户注册
