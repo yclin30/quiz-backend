@@ -121,4 +121,38 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionsMapper, Questions>
         if (keyword == null) keyword = "";
         return questionsMapper.findByKeyword(keyword.trim());
     }
+    /**
+     * 🆕 更新题目
+     */
+    @Override
+    public boolean updateQuestion(Questions question) {
+        if (question. getId() == null) {
+            throw new RuntimeException("题目ID不能为空");
+        }
+
+        // 检查题目是否存在
+        Questions existQuestion = questionsMapper.selectById(question.getId());
+        if (existQuestion == null) {
+            throw new RuntimeException("题目不存在");
+        }
+
+        // 设置更新时间
+        question.setUpdateTime(new Date());
+
+        int rows = questionsMapper.updateById(question);
+        return rows > 0;
+    }
+
+    /**
+     * 🆕 根据ID查询题目
+     */
+    @Override
+    public Questions getQuestionById(Integer id) {
+        Questions question = questionsMapper.selectById(id);
+        if (question == null) {
+            throw new RuntimeException("题目不存在");
+        }
+        return question;
+    }
+
 }

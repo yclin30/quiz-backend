@@ -61,4 +61,33 @@ public class QuestionController {
         List<Questions> list = questionService.findByKeyword(keyword);
         return Result.success(list);
     }
+
+    /**
+     * 🆕 更新题目
+     */
+    @PutMapping("/update")
+    public Result updateQuestion(@RequestBody Questions question) {
+        if (question == null || question.getId() == null) {
+            return Result.error("参数错误");
+        }
+        try {
+            boolean result = questionService.updateQuestion(question);
+            return result ? Result.success("更新成功") : Result.error("更新失败");
+        } catch (RuntimeException e) {
+            return Result.error(e.getMessage());
+        }
+    }
+
+    /**
+     * 🆕 根据ID查询题目
+     */
+    @GetMapping("/{id}")
+    public Result getQuestionById(@PathVariable Integer id) {
+        try {
+            Questions question = questionService.getQuestionById(id);
+            return Result.success(question);
+        } catch (RuntimeException e) {
+            return Result.error(e.getMessage());
+        }
+    }
 }

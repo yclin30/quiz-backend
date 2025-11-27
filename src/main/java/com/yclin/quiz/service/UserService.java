@@ -57,4 +57,14 @@ public interface UserService extends IService<User> {
     PageBean page(Integer page, Integer pageSize);
 
     public List<User> findByName(String keyword);
+
+    /**
+     * 🆕 重置用户密码为 "123456"
+     */
+    boolean resetPassword(Long id);
+
+    /**
+     * 🆕 管理员添加用户（可选择角色）
+     */
+    long addUser(UserRegisterRequest userRegisterRequest);
 }

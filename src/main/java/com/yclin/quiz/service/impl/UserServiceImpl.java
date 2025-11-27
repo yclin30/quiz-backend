@@ -272,4 +272,81 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
         return userList;
     }
+
+
+    /**
+     * 🆕 重置用户密码为 "123456"
+     */
+    @Override
+    public boolean resetPassword(Long id) {
+        // 1. 检查用户是否存在
+        User user = userMapper.selectById(id);
+        if (user == null || user.getIsDelete() == 1) {
+            throw new RuntimeException("用户不存在");
+        }
+
+        // 2. 加密新密码 "123456"
+        String newPassword = "123456";
+        String encryptPassword = DigestUtils.md5DigestAsHex((SALT + newPassword).getBytes());
+
+        // 3. 更新密码
+        user.setUserPassword(encryptPassword);
+        user.setUpdateTime(new Date());
+
+        int rows = userMapper.updateById(user);
+        return rows > 0;
+    }
+
+    /**
+     * 🆕 管理员添加用户（可选择角色）
+     */
+    @Override
+    public long addUser(UserRegisterRequest userRegisterRequest) {
+        String userName = userRegisterRequest.getUserName();
+        String userPassword = userRegisterRequest.getUserPassword();
+        String checkPassword = userRegisterRequest.getCheckPassword();
+        Integer userRole = userRegisterRequest. getUserRole();
+
+        // 1. 校验
+        if (StringUtils.isAnyBlank(userName, userPassword, checkPassword)) {
+            throw new RuntimeException("参数为空");
+        }
+        if (userName.length() < 4) {
+            throw new RuntimeException("用户名过短");
+        }
+        if (userPassword.length() < 8) {
+            throw new RuntimeException("密码过短");
+        }
+        if (!userPassword.equals(checkPassword)) {
+            throw new RuntimeException("两次密码不一致");
+        }
+
+        // 2. 检查用户名是否已存在
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("userName", userName);
+        queryWrapper. eq("isDelete", 0);
+        long count = this.count(queryWrapper);
+        if (count > 0) {
+            throw new RuntimeException("用户名已存在");
+        }
+
+        // 3. 加密密码
+        String encryptPassword = DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
+
+        // 4. 插入数据
+        User user = new User();
+        user.setUserName(userName);
+        user.setUserPassword(encryptPassword);
+        // 🆕 设置角色（如果没传，默认为普通用户）
+        user.setUserRole(userRole != null ? userRole : 0);
+        user.setCreateTime(new Date());
+        user.setUpdateTime(new Date());
+
+        boolean saveResult = this.save(user);
+        if (!saveResult) {
+            throw new RuntimeException("添加失败");
+        }
+
+        return user.getId();
+    }
 }

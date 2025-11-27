@@ -89,4 +89,5 @@ public class JwtUtil {
         Claims claims = parseToken(token);
         return claims.get("userRole", Integer.class);
     }
+
 }

@@ -197,4 +197,32 @@ public class UserController {
             return Result.error("Token无效");
         }
     }
+    /**
+     * 🆕 重置用户密码为 "123456"
+     */
+    @PutMapping("/resetPassword/{id}")
+    public Result resetPassword(@PathVariable("id") Long id) {
+        try {
+            boolean result = userService.resetPassword(id);
+            return result ?  Result.success("密码已重置为：123456") : Result.error("重置失败");
+        } catch (RuntimeException e) {
+            return Result.error(e.getMessage());
+        }
+    }
+
+    /**
+     * 🆕 管理员添加用户（可选择角色）
+     */
+    @PostMapping("/add")
+    public Result addUser(@RequestBody UserRegisterRequest userRegisterRequest) {
+        if (userRegisterRequest == null) {
+            return Result.error("参数为空");
+        }
+        try {
+            long result = userService.addUser(userRegisterRequest);
+            return Result.success("添加成功", result);
+        } catch (RuntimeException e) {
+            return Result.error(e.getMessage());
+        }
+    }
 }
