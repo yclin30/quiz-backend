@@ -225,4 +225,19 @@ public class UserController {
             return Result.error(e.getMessage());
         }
     }
+    /**
+     * 🆕 更新用户信息
+     */
+    @PutMapping("/update")
+    public Result updateUser(@RequestBody User user) {
+        if (user == null || user.getId() == null) {
+            return Result.error("参数错误");
+        }
+        try {
+            boolean result = userService.updateUser(user);
+            return result ? Result.success("更新成功") : Result.error("更新失败");
+        } catch (RuntimeException e) {
+            return Result.error(e.getMessage());
+        }
+    }
 }

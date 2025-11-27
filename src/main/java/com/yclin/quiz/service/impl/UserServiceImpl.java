@@ -349,4 +349,46 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
         return user.getId();
     }
+    /**
+     * 🆕 更新用户信息
+     */
+    @Override
+    public boolean updateUser(User user) {
+        if (user. getId() == null) {
+            throw new RuntimeException("用户ID不能为空");
+        }
+
+        // 检查用户是否存在
+        User existUser = userMapper.selectById(user.getId());
+        if (existUser == null || existUser.getIsDelete() == 1) {
+            throw new RuntimeException("用户不存在");
+        }
+
+        // 如果要更新用户名，检查是否重复
+        if (user.getUserName() != null && !user.getUserName().equals(existUser.getUserName())) {
+            QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+            queryWrapper. eq("userName", user.getUserName());
+            queryWrapper.eq("isDelete", 0);
+            queryWrapper.ne("id", user.getId());
+            long count = this.count(queryWrapper);
+            if (count > 0) {
+                throw new RuntimeException("用户名已存在");
+            }
+        }
+
+        // 如果要更新密码，需要加密
+        if (user.getUserPassword() != null && !user. getUserPassword().isEmpty()) {
+            String encryptPassword = DigestUtils.md5DigestAsHex((SALT + user.getUserPassword()).getBytes());
+            user.setUserPassword(encryptPassword);
+        } else {
+            // 不更新密码
+            user.setUserPassword(null);
+        }
+
+        // 设置更新时间
+        user.setUpdateTime(new Date());
+
+        int rows = userMapper.updateById(user);
+        return rows > 0;
+    }
 }

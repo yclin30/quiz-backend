@@ -67,4 +67,6 @@ public interface UserService extends IService<User> {
      * 🆕 管理员添加用户（可选择角色）
      */
     long addUser(UserRegisterRequest userRegisterRequest);
+
+    boolean updateUser(User user);
 }
