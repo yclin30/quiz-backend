@@ -114,10 +114,19 @@ public class JwtUtil {
             return null;
         }
         Object userId = claims.get("userId");
+        if (userId == null) {
+            return null;
+        }
         if (userId instanceof Integer) {
             return ((Integer) userId).longValue();
         }
-        return (Long) userId;
+        if (userId instanceof Long) {
+            return (Long) userId;
+        }
+        if (userId instanceof Number) {
+            return ((Number) userId).longValue();
+        }
+        return null;
     }
 
     /**
